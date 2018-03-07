@@ -92,19 +92,91 @@ void ST7032::display()
 void ST7032::noDisplay()
 {
 	displayOnOffSetting &= ~DISPLAY_ON_OFF_D;
-	Write_Instruction(displayOnOffSetting);
+	this->Write_Instruction(displayOnOffSetting);
+}
+
+void ST7032::cursor() //display underline cursor
+{ 
+	displayOnOffSetting |= DISPLAY_ON_OFF_C;
+	this->Write_Instruction(displayOnOffSetting);
+}
+
+void ST7032::noCursor() //stop display underline cursor
+{ 
+	displayOnOffSetting &= ~DISPLAY_ON_OFF_C;
+	this->Write_Instruction(displayOnOffSetting);
+}
+
+void ST7032::blink() //cursor block blink
+{ 
+	displayOnOffSetting |= DISPLAY_ON_OFF_B;
+	this->Write_Instruction(displayOnOffSetting);
+}
+
+void ST7032::noBlink() //stop cursor block blink
+{ 
+	displayOnOffSetting &= ~DISPLAY_ON_OFF_B;
+	this->Write_Instruction(displayOnOffSetting);
+}
+
+void ST7032::setcontrast(int val) 
+{
+	if (val > CONTRAST_MAX) val = CONTRAST_MIN;
+	else if (val < CONTRAST_MIN) val = CONTRAST_MAX;
+	Write_Instruction(CONTRAST_SET | (val & B00001111));
+	Write_Instruction((val >> 4) | POWER_ICON_BOST_CONTR | POWER_ICON_BOST_CONTR_Bon);
+	contrast = val;
+}
+
+void ST7032::adjcontrast(int val) 
+{
+	setcontrast(val + contrast);
+}
+
+uint8_t ST7032::getcontrast() 
+{
+	return contrast;
+}
+
+void ST7032::printString(unsigned char chr[])
+{
+  //Write_Instruction(LINE_1_ADR);  // 1 LINE ADDRESS
+  // delayMicroseconds(WRITE_DELAY_MS);
+  this->clear();
+  this->home();
+  for (int m = 0; m < 16; m++)
+    Write_Data(chr[m]);
+
+  Write_Instruction(LINE_2_ADR);  // 2 LINE ADDRESS
+  delayMicroseconds(WRITE_DELAY_MS);
+  for (int m = 16; m < 32; m++)
+    Write_Data(chr[m]);
+}
+
+void ST7032::show(unsigned char dat, unsigned char add, unsigned char nline)
+{
+	// Write_Instruction(0xC0);  //2 LINE ADDRESS
+	// delayMicroseconds(30);
+	if (nline == 1)
+		add = LINE_1_ADR + add;
+	if (nline == 2)
+		add = LINE_2_ADR + add;
+	Write_Instruction(add);
+	delayMicroseconds(WRITE_DELAY_MS);
+	Write_Data(dat);
 }
 
 void ST7032::Write_Instruction(uint8_t com)
 {
-	unsigned int j;
+	uint8_t j;
 	digitalWrite(_cs, LOW);
 	digitalWrite(_rs, LOW);
 	for (j = 0; j < 8; j++) {
-		if (com & 0x80)
-			digitalWrite(_sda, HIGH); //SDA = 1;
-		else
-			digitalWrite(_sda, LOW); //SDA = 0;
+		// if (com & 0x80)
+			// digitalWrite(_sda, HIGH); //SDA = 1;
+		// else
+			// digitalWrite(_sda, LOW); //SDA = 0;
+		digitalWrite(_sda, (com & 0x80)); //SDA = 0;
 		digitalWrite(_scl, LOW); //SCLK = 0;
 		com = com << 1;
 		digitalWrite(_scl, HIGH);
@@ -116,12 +188,13 @@ void ST7032::Write_Data(uint8_t dat)
 {
 	unsigned int j;
 	digitalWrite(_cs, LOW);
-	digitalWrite(_rs, LOW);
+	digitalWrite(_rs, HIGH);
 	for (j = 0; j < 8; j++) {
-		if (dat & 0x80)
-			digitalWrite(_sda, HIGH); //SDA = 1;
-		else
-			digitalWrite(_sda, LOW); //SDA = 0;
+		// if (dat & 0x80)
+			// digitalWrite(_sda, HIGH); //SDA = 1;
+		// else
+			// digitalWrite(_sda, LOW); //SDA = 0;
+		digitalWrite(_sda, (dat & 0x80));
 		digitalWrite(_scl, LOW); //SCLK = 0;
 		dat = dat << 1;
 		digitalWrite(_scl, HIGH);

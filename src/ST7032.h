@@ -51,11 +51,12 @@
 
 #define WRITE_DELAY_MS                  30 //see data sheet
 #define HOME_CLEAR_DELAY_MS			  1200 //see data sheet
+#define CONTRAST_MAX                  0x3F //limit range max value (0x00 - 0x3F)
+#define CONTRAST_MIN                  0x10 //limit range min value (0x00 - 0x3F)
 
 class ST7032: public Print 
 {
 	public:
-		// ST7032();
 		ST7032(uint8_t rst, uint8_t rs, uint8_t cs, uint8_t scl, uint8_t sda); 
 		void begin();
 		void clear();
@@ -64,20 +65,22 @@ class ST7032: public Print
 		void display();
 		void noDisplay();
 		void setCursor(uint8_t line, uint8_t pos);
-		// void cursor();
-		// void noCursor();
-		// void blink();
-		// void noBlink();
-		// void setcontrast(int val);
-		// void adjcontrast(int val);
-		// uint8_t getcontrast();
+		void cursor();
+		void noCursor();
+		void blink();
+		void noBlink();
+		void setcontrast(int val);
+		void adjcontrast(int val);
+		uint8_t getcontrast();
+		void printString(unsigned char chr[]);
+		void show(unsigned char dat, unsigned char add, unsigned char nline);
 		virtual size_t write(uint8_t chr);
-	
-	protected:
 		void Write_Instruction(uint8_t cmd);
 		void Write_Data(uint8_t data);
+	
+	protected:
 		uint8_t displayOnOffSetting = (DISPLAY_ON_OFF | DISPLAY_ON_OFF_D);
-		// uint8_t contrast = 0x18;
+		uint8_t contrast = 0x18;
 		
 	private:
 		uint8_t _numlines = 2;

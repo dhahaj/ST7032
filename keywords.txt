@@ -23,6 +23,8 @@ noBlink	KEYWORD2
 setcontrast	KEYWORD2
 adjcontrast	KEYWORD2
 getcontrast	KEYWORD2
+printString KEYWORD2
+show KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
