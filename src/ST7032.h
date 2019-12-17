@@ -1,12 +1,17 @@
 
 #ifndef LCD_ST7032_h
-	#define LCD_ST7032_h
+#define LCD_ST7032_h
 
 #include <Arduino.h>
+#include <SPI.h>
 
 // flags for Bias selection
-#define LCD_BIAS_1_4            0x08        // bias will be 1/4
-#define LCD_BIAS_1_5            0x00        // bias will be 1/5
+#define LCD_BIAS_1_4                  0x08        // bias will be 1/4
+#define LCD_BIAS_1_5                  0x00        // bias will be 1/5
+
+#define COMMAND                 0
+#define DATA                    1
+#define FOUR_BITS               2
 
 #define CNTRBIT                       0x00 //followed by command bytes
 #define CNTRBIT_CO                    0x80 //followed by 1 command byte
@@ -72,19 +77,23 @@ class ST7032: public Print
 		void setcontrast(int val);
 		void adjcontrast(int val);
 		uint8_t getcontrast();
-		void printString(unsigned char chr[]);
+		void printString(char chr[]);
+		void printString(const char*);
 		void show(unsigned char dat, unsigned char add, unsigned char nline);
 		virtual size_t write(uint8_t chr);
-		void Write_Instruction(uint8_t cmd);
-		void Write_Data(uint8_t data);
+
 	
 	protected:
 		uint8_t displayOnOffSetting = (DISPLAY_ON_OFF | DISPLAY_ON_OFF_D);
 		uint8_t contrast = 0x18;
 		
 	private:
+	SPISettings _spi_settings;
+		void send(uint8_t, uint8_t);
+		void Write_Instruction(uint8_t cmd);
+		void Write_Data(uint8_t data);
 		uint8_t _numlines = 2;
-		uint8_t _rst, _rs, _cs, _scl, _sda;
+		uint8_t _rst, _rs, _cs, _sclk, _sda;
 };	
 
 #endif
